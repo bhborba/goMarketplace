@@ -64,13 +64,54 @@ const CartProvider: React.FC = ({ children }) => {
     [products],
   );
 
-  const increment = useCallback(async id => {
-    // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
-  }, []);
+  const increment = useCallback(
+    async id => {
+      // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
+      const changeProduct = products.find(product => product.id === id);
+      if (changeProduct) {
+        changeProduct.quantity += 1;
+        const newProducts = products.filter(product => product.id !== id);
+        setProducts([...newProducts, changeProduct]);
+        await AsyncStorage.setItem(
+          '@GoMarketplace:products',
+          JSON.stringify(products),
+        );
+      }
+    },
+    [products],
+  );
 
-  const decrement = useCallback(async id => {
-    // TODO DECREMENTS A PRODUCT QUANTITY IN THE CART
-  }, []);
+  const decrement = useCallback(
+    async id => {
+      // TODO DECREMENTS A PRODUCT QUANTITY IN THE CART
+      const changeProduct = products.find(product => product.id === id);
+      if (changeProduct) {
+        const newProducts = products.filter(product => product.id !== id);
+        if (changeProduct.quantity === 1) {
+          Alert.alert('Atenção', 'Deseja remover esse item?', [
+            {
+              text: 'Sim',
+              onPress: () => {
+                setProducts(newProducts);
+              },
+            },
+            {
+              text: 'Não',
+              style: 'cancel',
+            },
+          ]);
+        } else {
+          changeProduct.quantity -= 1;
+          setProducts([...newProducts, changeProduct]);
+        }
+        await AsyncStorage.setItem(
+          '@GoMarketplace:products',
+          JSON.stringify(products),
+        );
+      }
+    },
+    [products],
+  );
 
   const value = React.useMemo(
     () => ({ addToCart, increment, decrement, products }),
